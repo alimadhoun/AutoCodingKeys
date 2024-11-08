@@ -424,4 +424,62 @@ final class AutoCodingKeysTests: XCTestCase {
         throw XCTSkip("macros are only supported when running tests for the host platform")
 #endif
     }
+    
+    func testCustomKeysWithCamelCase() throws {
+#if canImport(AutoCodingKeys)
+
+        @AutoCodingKeys(customKeys: ["deviceId": "device_id"], keyCase: .camelCase)
+        struct Device: Codable {
+            let deviceId: String
+            let deviceVersion: String
+        }
+        
+        // Initialize an instance of the struct.
+        let example = Device(deviceId: "abc", deviceVersion: "v443.5")
+        
+        // Encode the struct to JSON to verify if the generated CodingKeys are correct.
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .useDefaultKeys
+        guard let jsonData = try? encoder.encode(example),
+              let jsonString = String(data: jsonData, encoding: .utf8) else {
+            XCTFail("Failed to encode Example struct to JSON.")
+            return
+        }
+        
+        // Verify that JSON keys are in snake_case
+        XCTAssertTrue(jsonString.contains("\"device_id\":\"abc\""))
+        XCTAssertTrue(jsonString.contains("\"deviceVersion\":\"v443.5\""))
+#else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+#endif
+    }
+    
+    func testCustomKeysWithSnakeCase() throws {
+#if canImport(AutoCodingKeys)
+
+        @AutoCodingKeys(customKeys: ["deviceId": "deviceId"], keyCase: .snakeCase)
+        struct Device: Codable {
+            let deviceId: String
+            let deviceVersion: String
+        }
+        
+        // Initialize an instance of the struct.
+        let example = Device(deviceId: "abc", deviceVersion: "v443.5")
+        
+        // Encode the struct to JSON to verify if the generated CodingKeys are correct.
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .useDefaultKeys
+        guard let jsonData = try? encoder.encode(example),
+              let jsonString = String(data: jsonData, encoding: .utf8) else {
+            XCTFail("Failed to encode Example struct to JSON.")
+            return
+        }
+        
+        // Verify that JSON keys are in snake_case
+        XCTAssertTrue(jsonString.contains("\"deviceId\":\"abc\""))
+        XCTAssertTrue(jsonString.contains("\"device_version\":\"v443.5\""))
+#else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+#endif
+    }
 }

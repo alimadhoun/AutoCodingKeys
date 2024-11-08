@@ -1,8 +1,9 @@
 import AutoCodingKeys
 
-let a = 17
-let b = 25
+@AutoCodingKeys
+struct Example: Codable {
+    let firstName: String
+    let lastName: String
+    let age: Int
+}
 
-let (result, code) = #stringify(a + b)
-
-print("The value \(result) was produced by the code \"\(code)\"")

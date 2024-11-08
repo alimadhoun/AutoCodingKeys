@@ -137,7 +137,7 @@ final class AutoCodingKeysTests: XCTestCase {
         }
         
         // Verify that JSON keys are in snake_case
-        XCTAssertTrue(jsonString.contains("\"firsName\":\"Ali\""))
+        XCTAssertTrue(jsonString.contains("\"firstName\":\"Ali\""))
         XCTAssertTrue(jsonString.contains("\"lastName\":\"Gaza\""))
         XCTAssertTrue(jsonString.contains("\"age\":30"))
 #else

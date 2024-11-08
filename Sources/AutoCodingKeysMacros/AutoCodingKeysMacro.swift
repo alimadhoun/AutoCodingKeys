@@ -22,16 +22,22 @@ public struct AutoCodingKeysMacro: MemberMacro {
                 if let variable = member.decl.as(VariableDeclSyntax.self),
                    let propertyName = variable.bindings.first?.pattern.as(IdentifierPatternSyntax.self)?.identifier.text {
                     
-                    // Check if the property has a custom key
+//                    var codingKeyName: String = ""
                     if let customKey = customKeys[propertyName] {
+//                        codingKeyName = customKey
                         try EnumCaseDeclSyntax("case \(raw: propertyName) = \"\(raw: customKey)\"")
                     } else {
-                        // Apply specified case transformation if no custom key is provided
-                        let transformedKey = (keyCaseOption == .snakeCase)
-                        ? convertToSnakeCase(propertyName)
-                        : propertyName
-                        try EnumCaseDeclSyntax("case \(raw: propertyName) = \"\(raw: transformedKey)\"")
+                        // Determine coding key format based on keyCaseOption
+                        if keyCaseOption == .camelCase {
+//                            codingKeyName = convertToCamelCase(propertyName)
+                            try EnumCaseDeclSyntax("case \(raw: propertyName) = \"\(raw: convertToCamelCase(propertyName))\"")
+                        } else {
+                            try EnumCaseDeclSyntax("case \(raw: propertyName) = \"\(raw: convertToSnakeCase(propertyName))\"")
+//                            codingKeyName = convertToSnakeCase(propertyName)
+                        }
                     }
+                    
+                    
                 }
             }
         }
@@ -76,6 +82,21 @@ public struct AutoCodingKeysMacro: MemberMacro {
             }
         }
         return nil
+    }
+    
+    // Helper function to convert snake_case to camelCase
+    private static func convertToCamelCase(_ snakeCase: String) -> String {
+        let components = snakeCase.split(separator: "_")
+        guard components.count > 1 else {
+            return snakeCase
+        }
+        
+        let fistComponent = components.first?.description.lowercased() ?? ""
+        let capitalizedComponents = components
+            .dropFirst()
+            .map({ $0.capitalized })
+        
+        return fistComponent + capitalizedComponents.joined()
     }
     
     private static func convertToSnakeCase(_ camelCase: String) -> String {

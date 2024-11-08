@@ -1,3 +1,3 @@
 
 @attached(member, names: named(CodingKeys))
-public macro AutoCodingKeys() = #externalMacro(module: "AutoCodingKeysMacros", type: "AutoCodingKeysMacro")
+public macro AutoCodingKeys(customKeys: [String: String] = [:]) = #externalMacro(module: "AutoCodingKeysMacros", type: "AutoCodingKeysMacro")

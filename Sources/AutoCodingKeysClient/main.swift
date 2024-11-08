@@ -1,7 +1,15 @@
 import AutoCodingKeys
 
+
 @AutoCodingKeys
 struct Person: Codable {
+    let firstName: String
+    let lastName: String
+    let age: Int
+}
+
+@AutoCodingKeys(keyCase: .camelCase)
+struct PersonWithCamelCaseKeys: Codable {
     let firstName: String
     let lastName: String
     let age: Int

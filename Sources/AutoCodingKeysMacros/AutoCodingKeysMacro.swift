@@ -14,6 +14,8 @@ public struct AutoCodingKeysMacro: MemberMacro {
         // Retrieve custom key mappings from the macro's arguments
         let customKeys = extractCustomKeys(from: node)
         
+        let keyCaseOption = extractKeyCase(from: node) ?? .snakeCase
+        
         // Generate CodingKeys enum
         let codingKeysEnum = try EnumDeclSyntax("enum CodingKeys: String, CodingKey") {
             for member in structDecl.memberBlock.members {
@@ -24,9 +26,11 @@ public struct AutoCodingKeysMacro: MemberMacro {
                     if let customKey = customKeys[propertyName] {
                         try EnumCaseDeclSyntax("case \(raw: propertyName) = \"\(raw: customKey)\"")
                     } else {
-                        // Convert to snake_case if no custom key is provided
-                        let snakeCaseName = convertToSnakeCase(propertyName)
-                        try EnumCaseDeclSyntax("case \(raw: propertyName) = \"\(raw: snakeCaseName)\"")
+                        // Apply specified case transformation if no custom key is provided
+                        let transformedKey = (keyCaseOption == .snakeCase)
+                        ? convertToSnakeCase(propertyName)
+                        : propertyName
+                        try EnumCaseDeclSyntax("case \(raw: propertyName) = \"\(raw: transformedKey)\"")
                     }
                 }
             }
@@ -60,6 +64,20 @@ public struct AutoCodingKeysMacro: MemberMacro {
         return customKeys
     }
     
+    // Helper function to parse keyCase argument from the macro
+    private static func extractKeyCase(from node: AttributeSyntax) -> AutoCodingKeyCase? {
+        if let argumentList = node.arguments?.as(LabeledExprListSyntax.self) {
+            for element in argumentList {
+                if let label = element.label?.text, label == "keyCase",
+                   let caseLiteral = element.expression.as(MemberAccessExprSyntax.self) {
+                    let caseValue = caseLiteral.declName.baseName.text
+                    return AutoCodingKeyCase(rawValue: caseValue)
+                }
+            }
+        }
+        return nil
+    }
+    
     private static func convertToSnakeCase(_ camelCase: String) -> String {
         // Converts camelCase to snake_case
         var snakeCase = ""
@@ -80,4 +98,9 @@ struct AutoCodingKeysPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         AutoCodingKeysMacro.self,
     ]
+}
+
+public enum AutoCodingKeyCase: String {
+    case snakeCase
+    case camelCase
 }
